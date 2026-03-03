@@ -1,0 +1,16 @@
+# Ignorar archivos locales con secretos
+.env
+credentials.json
+client_secret.json
+token.json
+
+# Carpetas de datos y caché
+data/
+output/
+test/
+__pycache__/
+
+# Git
+.git
+.gitignore
+.github/

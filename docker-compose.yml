@@ -1,0 +1,11 @@
+services:
+  etl-pipeline:
+    build: .
+    container_name: spots_etl
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+      - ./token.json:/app/token.json
+      - ./credentials.json:/app/credentials.json
+      - ./client_secret.json:/app/client_secret.json
+    restart: "no" # The container will run once and stop

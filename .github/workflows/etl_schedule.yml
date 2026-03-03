@@ -27,11 +27,11 @@ jobs:
 
       - name: Run ETL pipeline
         env:
-          ADVERTISER_IDS: "${{ secrets.ADVERTISER_IDS }}"
-          SPECIAL_SPOT: "${{ secrets.SPECIAL_SPOT }}"
-          FILE_PREFIXES: "${{ secrets.FILE_PREFIXES }}"
-          GOOGLE_SHEET_NAME: "${{ secrets.GOOGLE_SHEET_NAME }}"
-          GMAIL_LABEL: "${{ secrets.GMAIL_LABEL }}"
+          ADVERTISER_IDS: "${{ vars.ADVERTISER_IDS }}"
+          SPECIAL_SPOT: "${{ vars.SPECIAL_SPOT }}"
+          FILE_PREFIXES: "${{ vars.FILE_PREFIXES }}"
+          GOOGLE_SHEET_NAME: "${{ vars.GOOGLE_SHEET_NAME }}"
+          GMAIL_LABEL: "${{ vars.GMAIL_LABEL }}"
           DATA_DIR: "data"
           GOOGLE_CREDENTIALS_BASE64: "${{ secrets.GOOGLE_CREDENTIALS }}"
           GMAIL_CLIENT_SECRET_BASE64: "${{ secrets.GMAIL_CLIENT_SECRET }}"

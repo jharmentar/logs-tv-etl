@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estación La Paz</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080f1a;
+      --surface: #0f1d2e;
+      --surface2: #142338;
+      --orange: #f06a1e;
+      --orange-glow: rgba(240, 106, 30, 0.15);
+      --green: #22c97a;
+      --green-glow: rgba(34, 201, 122, 0.12);
+      --red: #f05757;
+      --red-glow: rgba(240, 87, 87, 0.12);
+      --blue: #5b9cf6;
+      --text: #e2eaf6;
+      --muted: #5a7a99;
+      --border: rgba(255, 255, 255, 0.07);
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Space Grotesk', sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      background-image: radial-gradient(ellipse at 20% 0%, rgba(240, 106, 30, 0.05) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 100%, rgba(91, 156, 246, 0.04) 0%, transparent 60%);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    .header {
+      background: rgba(8, 15, 26, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-logo {
+      height: 32px;
+      width: auto;
+      display: block;
+      filter: brightness(0) invert(1);
+      flex-shrink: 0;
+    }
+
+    .header-title {
+      flex: 1;
+      text-align: center;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-shrink: 0;
+    }
+
+    .live-clock {
+      font-family: var(--mono);
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--orange);
+      letter-spacing: 0.04em;
+      text-shadow: 0 0 20px rgba(240, 106, 30, 0.4);
+    }
+
+    .live-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--orange);
+      margin-right: 8px;
+      box-shadow: 0 0 8px var(--orange);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: .3;
+        transform: scale(.7)
+      }
+    }
+
+    .date-badge {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* TURNO BUTTONS */
+    .turno-filter {
+      display: flex;
+      gap: 8px;
+    }
+
+    .turno-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 28px;
+      border-radius: 8px;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: all 0.25s cubic-bezier(.4, 0, .2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .turno-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--orange-glow);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    .turno-btn.active {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: white;
+      box-shadow: 0 0 24px rgba(240, 106, 30, 0.35), 0 4px 12px rgba(0, 0, 0, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .turno-btn:hover:not(.active) {
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .turno-btn:hover:not(.active)::after {
+      opacity: 1;
+    }
+
+    /* GENERAL: total por canal + primer/último spot del día */
+    .canal-totals {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      padding: 16px 28px 0;
+    }
+
+    .canal-total-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .canal-total-name {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .canal-total-label {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .canal-total-num {
+      font-family: var(--mono);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--orange);
+      text-shadow: 0 0 20px var(--orange-glow);
+    }
+
+    .daysummary {
+      display: flex;
+      gap: 12px;
+      padding: 16px 28px 0;
+    }
+
+    .summary-box {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      text-align: center;
+    }
+
+    .summary-label {
+      display: block;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .summary-name {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    /* NEXT BANNER */
+    .next-banner {
+      margin: 16px 28px;
+      background: linear-gradient(135deg, rgba(240, 106, 30, 0.08), rgba(240, 106, 30, 0.03));
+      border: 1px solid rgba(240, 106, 30, 0.25);
+      border-radius: 10px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-family: var(--mono);
+      font-size: 13px;
+      animation: bannerPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes bannerPulse {
+
+      0%,
+      100% {
+        border-color: rgba(240, 106, 30, 0.25);
+      }
+
+      50% {
+        border-color: rgba(240, 106, 30, 0.5);
+      }
+    }
+
+    .next-label {
+      color: var(--orange);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .next-canal {
+      color: var(--muted);
+      font-size: 11px;
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 4px;
+      white-space: nowrap;
+      background: var(--surface2);
+    }
+
+    .next-name {
+      color: var(--text);
+      font-weight: 600;
+      flex: 1;
+      font-size: 13px;
+    }
+
+    .next-time {
+      color: var(--orange);
+      margin-left: auto;
+      font-size: 18px;
+      font-weight: 600;
+      text-shadow: 0 0 16px rgba(240, 106, 30, 0.4);
+    }
+
+    /* GRID DE SPOTS POR TURNO */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding: 16px 28px 28px;
+    }
+
+    .canal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .canal-header {
+      background: var(--surface2);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .canal-name {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    .canal-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      color: var(--orange);
+      background: var(--orange-glow);
+      border: 1px solid rgba(240, 106, 30, 0.2);
+      font-weight: 600;
+    }
+
+    .progress-wrap {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--orange), #ffaa44);
+      transition: width 0.6s cubic-bezier(.4, 0, .2, 1);
+      box-shadow: 0 0 8px rgba(240, 106, 30, 0.4);
+    }
+
+    .spot-row {
+      display: flex;
+      align-items: center;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+    }
+
+    .spot-row:last-child {
+      border-bottom: none;
+    }
+
+    .spot-name {
+      flex: 1;
+      font-size: 12px;
+      font-family: var(--mono);
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .spot-time {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+
+    .spot-row.is-done {
+      background: rgba(34, 201, 122, 0.04);
+    }
+
+    .spot-row.is-done .spot-name {
+      color: var(--muted);
+      text-decoration: line-through;
+      text-decoration-color: rgba(90, 122, 153, 0.5);
+    }
+
+    .spot-row.is-done .spot-time {
+      color: var(--muted);
+    }
+
+    .spot-row.is-next {
+      background: rgba(240, 106, 30, 0.06);
+      border-left: 3px solid var(--orange);
+    }
+
+    .spot-row.is-next .spot-time {
+      color: var(--orange);
+      text-shadow: 0 0 10px rgba(240, 106, 30, 0.4);
+    }
+
+    .spot-row.is-next .spot-name {
+      color: #f0d0b0;
+    }
+
+    @media (max-width: 780px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* LOADING */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px;
+      gap: 16px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 2px solid var(--border);
+      border-top-color: var(--orange);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      box-shadow: 0 0 12px var(--orange-glow);
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .error-msg {
+      margin: 24px;
+      background: rgba(240, 87, 87, 0.08);
+      border: 1px solid rgba(240, 87, 87, 0.25);
+      border-radius: 10px;
+      padding: 20px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: #f5b0b0;
+    }
+
+    /* HUSO HORARIO */
+    .huso-section {
+      margin: 0 28px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .huso-heading {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .huso-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px 24px;
+      background: linear-gradient(135deg, var(--surface), var(--surface2));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .huso-left {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 150px;
+    }
+
+    .huso-id {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text);
+      letter-spacing: 0.03em;
+    }
+
+    .huso-fecha {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .huso-fields {
+      display: flex;
+      flex-wrap: wrap;
+      flex: 1;
+      gap: 0;
+    }
+
+    .huso-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 0 22px;
+      border-left: 1px solid var(--border);
+    }
+
+    .huso-field:first-child {
+      padding-left: 0;
+      border-left: none;
+    }
+
+    .huso-field-label {
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .huso-field-val {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .huso-status {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-left: auto;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .huso-row.is-live {
+      border-color: rgba(240, 106, 30, 0.4);
+      box-shadow: 0 0 24px rgba(240, 106, 30, 0.1);
+    }
+
+    .huso-row.is-live .huso-status {
+      color: var(--orange);
+      background: var(--orange-glow);
+      border: 1px solid rgba(240, 106, 30, 0.3);
+    }
+
+    .huso-row.is-next .huso-status {
+      color: var(--blue);
+      background: rgba(91, 156, 246, 0.12);
+      border: 1px solid rgba(91, 156, 246, 0.25);
+    }
+
+    .huso-row.is-done {
+      opacity: 0.55;
+    }
+
+    .huso-row.is-done .huso-status {
+      color: var(--green);
+      background: var(--green-glow);
+      border: 1px solid rgba(34, 201, 122, 0.25);
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="header">
+    <img src="televisa_bis.png" alt="Televisa Logo" class="header-logo">
+    <div class="header-title">Estación La Paz</div>
+    <div class="header-right">
+      <div class="turno-filter">
+        <button class="turno-btn active" onclick="setTurno('General')">General</button>
+        <button class="turno-btn" onclick="setTurno('Mañana')">Mañana</button>
+        <button class="turno-btn" onclick="setTurno('Tarde')">Tarde</button>
+        <button class="turno-btn" onclick="setTurno('Noche')">Noche</button>
+      </div>
+      <span class="date-badge" id="dateBadge"></span>
+      <div class="live-clock"><span class="live-dot"></span><span id="clock">--:--:--</span></div>
+    </div>
+  </header>
+
+  <div id="canalTotals" class="canal-totals"></div>
+  <div id="daySummary" class="daysummary"></div>
+
+  <div id="nextBanner" class="next-banner">
+    <span class="next-label" id="nextLabel">▶ Próximo spot</span>
+    <span class="next-canal" id="nextCanal">—</span>
+    <span class="next-name" id="nextName">Cargando datos...</span>
+    <span class="next-time" id="nextTime">—</span>
+  </div>
+
+  <div id="husoSection" class="huso-section"></div>
+
+  <div id="mainGrid">
+    <div class="loading">
+      <div class="spinner"></div>
+      <span>Cargando datos desde Google Sheets...</span>
+    </div>
+  </div>
+
+  <script>
+    // ─── CONFIG ───────────────────────────────────────────────────────────────
+    const SHEET_ID = '1n6HXnxtUQmtAtE3xxYmeWBBXzvaSbQScHep5fQXsDi0';
+    // List of technical sheet names as they appear in Google Sheets
+    const CANALES = ['Spot2', 'Spot4', 'Spot5', 'Spot9'];
+    // Mapping for readable display names
+    const CANAL_DISPLAY_NAMES = {
+      'Spot2': 'Las Estrellas',
+      'Spot4': 'ForoTV',
+      'Spot5': 'Canal 5',
+      'Spot9': 'Nu9ve'
+    };
+    const HUSO_SHEET = 'HusoHorario';
+
+    // ─── STATE ────────────────────────────────────────────────────────────────
+    let currentTurno = 'General';
+    let sheetsData = {}; // { 'spot 2': [{spot, time, turno}, ...], ... }
+    let husoData = []; // [{id, fecha, bloqueoInicio, bloqueoFin, regreso}, ...]
+
+    // ─── FETCH SHEETS ─────────────────────────────────────────────────────────
+    async function fetchSheetRaw(sheetName) {
+      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`No se pudo cargar la hoja: ${sheetName}`);
+      return res.text();
+    }
+
+    async function fetchSheet(sheetName) {
+      return parseCSV(await fetchSheetRaw(sheetName));
+    }
+
+    function splitCSVLine(line) {
+      const cols = [];
+      let cur = '', inQ = false;
+      for (let ch of line) {
+        if (ch === '"') inQ = !inQ;
+        else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+        else cur += ch;
+      }
+      cols.push(cur.trim());
+      return cols;
+    }
+
+    // "2026-07-06 7:17:06" -> Date real (parseo manual, no depende del locale del navegador)
+    function parseDateTime(rawDateTime) {
+      const [datePart, timePart] = (rawDateTime || '').split(' ');
+      if (!datePart || !timePart) return null;
+      const [y, mo, d] = datePart.split('-').map(Number);
+      const [h, mi, s] = timePart.split(':').map(Number);
+      if (!y || !mo || !d) return null;
+      return new Date(y, mo - 1, d, h || 0, mi || 0, s || 0);
+    }
+
+    function parseCSV(text) {
+      const lines = text.trim().split('\n');
+      if (lines.length < 2) return [];
+      const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim().toLowerCase());
+      return lines.slice(1).map(line => {
+        const cols = splitCSVLine(line);
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = (cols[i] || '').replace(/"/g, '').trim());
+
+        // Extract HH:MM:SS from full datetime "2026-03-11 7:16:20"
+        const rawTime = obj['time'] || '';
+        const timePart = rawTime.includes(' ') ? rawTime.split(' ')[1] : rawTime;
+        // Zero-pad single-digit hours: "7:16:20" -> "07:16:20"
+        obj.time = timePart.replace(/^(\d):/, '0$1:');
+        // Fecha+hora real — así "pendiente/emitido" no se rompe al cruzar medianoche (turno Noche)
+        obj.dt = parseDateTime(rawTime);
+
+        obj.spot = obj['spot'] || '';
+        obj.turno = obj['turno'] || '';
+
+        return obj;
+      }).filter(r => r.spot && r.time && r.dt);
+    }
+
+    // "LUNES 06 DE JULIO, 14:15 - 15:15" -> time range after the comma
+    // "LUNES 06 DE JULIO, 15:15" -> "15:15"
+    function extractTime(str) {
+      const commaIdx = str.indexOf(',');
+      return (commaIdx >= 0 ? str.slice(commaIdx + 1) : str).trim();
+    }
+
+    function extractTimeRange(str) {
+      return extractTime(str).split('-').map(s => s.trim());
+    }
+
+    // Combina una fecha "2026-07-06" con una hora "14:15" (o "24:00") en un Date real
+    function combineDateTime(isoDate, timeStr) {
+      let [h, m] = (timeStr || '0:0').split(':').map(Number);
+      const d = new Date(`${isoDate}T00:00:00`);
+      if (h >= 24) { d.setDate(d.getDate() + 1); h -= 24; }
+      d.setHours(h || 0, m || 0, 0, 0);
+      return d;
+    }
+
+    function parseHusoCSV(text) {
+      const lines = text.trim().split('\n');
+      if (lines.length < 2) return [];
+      const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim().toLowerCase());
+      return lines.slice(1).map(line => {
+        const cols = splitCSVLine(line);
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = (cols[i] || '').replace(/"/g, '').trim());
+
+        const [bloqueoInicio, bloqueoFin] = extractTimeRange(obj['bloqueos'] || '');
+        const inicioDirecto = extractTime(obj['inicio de directo'] || '');
+        const finDirecto = extractTime(obj['final de directo'] || '');
+        const regreso = extractTime(obj['regreso a time delay'] || '');
+        // "orden_cronologico" trae "2026-07-06 01:00:00" — solo nos sirve la fecha
+        const isoDate = (obj['orden_cronologico'] || '').split(' ')[0];
+
+        return {
+          id: obj['huso horario'] || '',
+          fecha: obj['fecha'] || '',
+          inicioDirecto,
+          finDirecto,
+          bloqueoInicio: bloqueoInicio || '',
+          bloqueoFin: bloqueoFin || '',
+          regreso,
+          inicioDirectoDT: isoDate ? combineDateTime(isoDate, inicioDirecto) : null,
+          bloqueoInicioDT: isoDate ? combineDateTime(isoDate, bloqueoInicio) : null,
+          bloqueoFinDT: isoDate ? combineDateTime(isoDate, bloqueoFin) : null
+        };
+      }).filter(h => h.id && h.bloqueoInicioDT && h.bloqueoFinDT)
+        .sort((a, b) => b.bloqueoInicioDT - a.bloqueoInicioDT);
+    }
+
+    async function loadAllSheets() {
+      const grid = document.getElementById('mainGrid');
+      try {
+        const results = await Promise.all(CANALES.map(c => fetchSheet(c)));
+        CANALES.forEach((c, i) => { sheetsData[c] = results[i]; });
+
+        // Huso Horario es esporádico (no llega todos los días): si falla o
+        // la hoja no existe, no debe tumbar el resto del dashboard.
+        try {
+          husoData = parseHusoCSV(await fetchSheetRaw(HUSO_SHEET));
+        } catch (heInner) {
+          husoData = [];
+        }
+
+        render();
+        renderHuso();
+        renderDaySummary();
+      } catch (e) {
+        grid.innerHTML = `<div class="error-msg">
+        ⚠ Error al cargar Google Sheets:<br>${e.message}<br><br>
+        Verifica que la Sheet sea pública y que los nombres de las hojas sean exactamente:<br>
+        ${CANALES.map(c => `<strong>${c}</strong>`).join(', ')}
+      </div>`;
+      }
+    }
+
+    // ─── HELPERS ──────────────────────────────────────────────────────────────
+    function isSpotDone(spotDT) {
+      return new Date() > spotDT;
+    }
+
+    // "Total del día" en General, "Total turno" en Mañana/Tarde/Noche
+    function turnoLabel() {
+      return currentTurno === 'General' ? 'Total de Bloqueos' : 'Total turno';
+    }
+
+    function setTurno(t) {
+      currentTurno = t;
+      document.querySelectorAll('.turno-btn').forEach(b => {
+        b.classList.toggle('active', b.textContent === t);
+      });
+      document.getElementById('daySummary').style.display = t === 'General' ? 'flex' : 'none';
+      document.getElementById('canalTotals').style.display = t === 'General' ? 'grid' : 'none';
+      document.getElementById('husoSection').style.display = t === 'General' ? 'flex' : 'none';
+      render();
+    }
+
+    // Filtra spots por el turno seleccionado; 'General' = todos, sin filtrar
+    function filterByTurno(allSpots) {
+      if (currentTurno === 'General') return allSpots;
+      const turnoNorm = currentTurno.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      return allSpots.filter(s => {
+        const t = (s.turno || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        return t === turnoNorm;
+      });
+    }
+
+    // ─── GRANULAR UPDATES ─────────────────────────────────────────────────────
+    function updateDashboardMetadata() {
+      let totalAll = 0;
+      let nextSpot = null;
+
+      CANALES.forEach(canal => {
+        const spots = filterByTurno(sheetsData[canal] || []);
+        const canalSafe = canal.replace(/\s+/g, '_');
+        let doneInCanal = 0;
+
+        spots.forEach((spot, si) => {
+          const done = isSpotDone(spot.dt);
+          totalAll++;
+          if (done) {
+            doneInCanal++;
+          } else {
+            if (!nextSpot || spot.dt < nextSpot.dt) {
+              nextSpot = { name: spot.spot, time: spot.time, dt: spot.dt, canal, idx: si };
+            }
+          }
+
+          const row = document.getElementById(`row-${canalSafe}-${si}`);
+          if (row) row.classList.toggle('is-done', done);
+        });
+
+        const badge = document.getElementById(`badge-${canalSafe}`);
+        const pbar = document.getElementById(`pbar-${canalSafe}`);
+        if (badge) badge.textContent = `${doneInCanal}/${spots.length}`;
+        if (pbar) pbar.style.width = spots.length ? (doneInCanal / spots.length * 100) + '%' : '0%';
+      });
+
+      if (nextSpot) {
+        const nextRow = document.getElementById(`row-${nextSpot.canal.replace(/\s+/g, '_')}-${nextSpot.idx}`);
+        if (nextRow) nextRow.classList.add('is-next');
+      }
+
+      // Next Banner
+      const nLabel = document.getElementById('nextLabel');
+      const nName = document.getElementById('nextName');
+      const nTime = document.getElementById('nextTime');
+      const nCanal = document.getElementById('nextCanal');
+
+      if (nextSpot) {
+        nLabel.textContent = '▶ Próximo spot';
+        nName.textContent = nextSpot.name;
+        nTime.textContent = nextSpot.time;
+        const dispName = CANAL_DISPLAY_NAMES[nextSpot.canal] || nextSpot.canal;
+        nCanal.textContent = dispName.toUpperCase();
+      } else if (totalAll === 0) {
+        nName.textContent = 'Sin spots para este turno';
+        nTime.textContent = '—';
+        nCanal.textContent = '';
+      } else {
+        nLabel.textContent = '✓ Completado';
+        nName.textContent = 'Todos los spots emitidos';
+        nTime.textContent = '';
+        nCanal.textContent = '';
+      }
+    }
+
+    // ─── RENDER ───────────────────────────────────────────────────────────────
+    function render() {
+      const grid = document.getElementById('mainGrid');
+      grid.innerHTML = '';
+      grid.className = currentTurno === 'General' ? '' : 'grid';
+
+      if (currentTurno !== 'General') {
+        CANALES.forEach(canal => {
+          const spots = filterByTurno(sheetsData[canal] || []);
+          if (spots.length === 0) return;
+
+          const canalSafe = canal.replace(/\s+/g, '_');
+          const card = document.createElement('div');
+          card.className = 'canal-card';
+          card.innerHTML = `
+            <div class="progress-wrap"><div id="pbar-${canalSafe}" class="progress-bar"></div></div>
+            <div class="canal-header">
+              <span class="canal-name">${(CANAL_DISPLAY_NAMES[canal] || canal).toUpperCase()}</span>
+              <span id="badge-${canalSafe}" class="canal-badge">—</span>
+            </div>
+          `;
+
+          spots.forEach((spot, si) => {
+            const row = document.createElement('div');
+            row.id = `row-${canalSafe}-${si}`;
+            row.className = 'spot-row';
+            row.innerHTML = `
+              <span class="spot-time">${spot.time || '—'}</span>
+              <span class="spot-name">${spot.spot || '—'}</span>
+            `;
+            card.appendChild(row);
+          });
+
+          grid.appendChild(card);
+        });
+      }
+
+      updateDashboardMetadata();
+      renderCanalTotals();
+    }
+
+    // Tarjetas de total por canal — respetan el turno seleccionado (General = día completo)
+    function renderCanalTotals() {
+      const el = document.getElementById('canalTotals');
+      const label = turnoLabel();
+      el.innerHTML = CANALES.map(canal => {
+        const total = filterByTurno(sheetsData[canal] || []).length;
+        return `<div class="canal-total-card">
+          <div class="canal-total-name">${CANAL_DISPLAY_NAMES[canal] || canal}</div>
+          <div class="canal-total-label">${label}</div>
+          <div class="canal-total-num">${total}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderDaySummary() {
+      const el = document.getElementById('daySummary');
+      let all = [];
+      CANALES.forEach(c => { all = all.concat(sheetsData[c] || []); });
+
+      const real = all.filter(s => s.spot.toUpperCase() !== 'PROTECCION');
+      if (!real.length) { el.innerHTML = ''; return; }
+
+      real.sort((a, b) => a.dt - b.dt);
+      const first = real[0], last = real[real.length - 1];
+
+      el.innerHTML = `
+        <div class="summary-box"><span class="summary-label">Primer spot</span><span class="summary-name">${first.spot}</span></div>
+        <div class="summary-box"><span class="summary-label">Último spot</span><span class="summary-name">${last.spot}</span></div>
+      `;
+    }
+
+    // ─── HUSO HORARIO ─────────────────────────────────────────────────────────
+    function renderHuso() {
+      const el = document.getElementById('husoSection');
+      if (!husoData.length) { el.innerHTML = ''; return; }
+
+      const now = new Date();
+      const rows = husoData.map(h => {
+        let cls = 'is-next', status = 'PRÓXIMO INICIO A DIRECTO';
+        if (now >= h.inicioDirectoDT && now < h.bloqueoInicioDT) {
+          cls = 'is-next'; status = 'EN VIVO';
+        }
+        if (now >= h.bloqueoInicioDT && now <= h.bloqueoFinDT) {
+          cls = 'is-live'; status = 'EN BLOQUEO';
+        } else if (now > h.bloqueoFinDT) {
+          cls = 'is-done'; status = 'REGRESÓ A TIME DELAY';
+        }
+
+        return `<div class="huso-row ${cls}">
+          <div class="huso-left">
+            <span class="huso-id">${h.id}</span>
+            <span class="huso-fecha">${h.fecha}</span>
+          </div>
+          <div class="huso-fields">
+            <div class="huso-field"><span class="huso-field-label">Inicio</span><span class="huso-field-val">${h.inicioDirecto}</span></div>
+            <div class="huso-field"><span class="huso-field-label">Fin</span><span class="huso-field-val">${h.finDirecto}</span></div>
+            <div class="huso-field"><span class="huso-field-label">Bloqueo</span><span class="huso-field-val">${h.bloqueoInicio} – ${h.bloqueoFin}</span></div>
+            <div class="huso-field"><span class="huso-field-label">Regreso</span><span class="huso-field-val">${h.regreso}</span></div>
+          </div>
+          <span class="huso-status">${status}</span>
+        </div>`;
+      }).join('');
+
+      el.innerHTML = `<div class="huso-heading">⏱ Huso Horario</div>${rows}`;
+    }
+
+    // ─── CLOCK ────────────────────────────────────────────────────────────────
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+      const months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+      document.getElementById('dateBadge').textContent =
+        `${String(now.getDate()).padStart(2, '0')}-${months[now.getMonth()]}-${now.getFullYear()}`;
+      // Solo actualiza el reloj — las tablas de spots NO se re-renderizan aquí
+      renderHuso();
+    }
+
+    // ─── INIT ─────────────────────────────────────────────────────────────────
+    loadAllSheets();
+    updateClock();
+    setInterval(updateClock, 1000);
+    // Verificar cada hora si ya es un día nuevo y recargar si es necesario
+    let loadedDate = new Date().toDateString();
+
+    setInterval(() => {
+      const now = new Date();
+      const todayStr = now.toDateString();
+      // Si cambió el día y ya pasó la 1:00 AM, recargar datos
+      if (todayStr !== loadedDate && now.getHours() >= 2) {
+        loadedDate = todayStr;
+        loadAllSheets();
+      }
+    }, 60 * 60 * 1000); // checar cada hora
+  </script>
+</body>
+
+</html>
